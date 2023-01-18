@@ -1,0 +1,71 @@
+body {
+	font-family: "Calisto MT", Optima, "Lucida Bright", serif;
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	background-color: black;
+	color: white;
+	font-size: 12pt;
+}
+div#topdiv {
+	min-height: 100vh;
+	box-sizing: border-box;
+}
+div.page {
+	text-align: center;
+	width: 100%;
+	max-width: 900px;
+	margin: 0 auto;
+	box-sizing: border-box;
+	padding: 32px;
+	background-color: #404040;
+}
+div#topdiv {
+	padding: 32px;
+}
+form#downloadform {
+	padding-top: 32px;
+}
+div#uploadinfodiv {
+	text-align: left;
+	width: fit-content;
+	margin: 0 auto;
+}
+div.uploadinfo {
+	margin: 2px;
+	background-color: #505050;
+	padding: 4px;
+}
+div.uploadinfoline {
+}
+div#footer {
+	padding-top: 20px;
+	font-size: 10pt;
+}
+a:link, a:visited {
+	color: #aaaaff;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+a.filelink > div.fileid {
+	display: inline;
+	color: #ddddff;
+	font-weight: bold;
+}
+a.actionbutton {
+	margin: 6px 2px;
+	padding: 4px;
+	border-radius: 4px;
+	background-color: #606060;
+	display: inline-block;
+}
+@media only screen and (max-width: 639px) {
+	div#topdiv {
+		padding: 16px;
+	}
+	div#page {
+		padding: 16px;
+	}
+}

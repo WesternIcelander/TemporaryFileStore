@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Temporary File Store</title>
+        <meta charset="utf-8">
+        <link rel="STYLESHEET" href="/resources/style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="apple-touch-icon" href="/resources/appleicon.png">
+        <script src="/resources/script.js"></script>
+    </head>
+    <body>
+        <div id="topdiv">
+            <div class="page">
+                <form id="uploadform" action="/upload" method="POST" enctype="multipart/form-data">
+                    Upload a file here and get a download link that is valid for 48 hours!<br>
+                    <input type="file" name="file" id="filefield"><br>
+                    <input type="submit" value="Upload and Get Link">
+                </form>
+                <div id="uploadinfodiv"></div>
+                <form id="downloadform" action="/download" method="POST">
+                    Download a file<br>
+                    Code: <input type="text" name="fileid" size="8"><input type="submit" value="Go">
+                </form>
+                <br>
+                <div id="footer">
+                    $footer<br>
+                    <br>
+                    Source code: <a href="https://github.com/Siggiio/TemporaryFileStore">github.com/Siggiio/TemporaryFileStore</a>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
