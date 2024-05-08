@@ -355,6 +355,11 @@ public class TemporaryFileStore {
         fileDownload:
         {
             String fileId = request.url.substring(1);
+            boolean forceInline = false;
+            if (fileId.endsWith(".i")) {
+                fileId = fileId.substring(0, fileId.length() - 2);
+                forceInline = true;
+            }
             if (fileId.contains("/") || fileId.contains(".")) {
                 break fileDownload;
             }
@@ -377,12 +382,24 @@ public class TemporaryFileStore {
             String displayType = "attachment";
             String contentType = httpServer.getMimeType(getExtension(fileInfo.fileName));
             if (fileInfo.contentType.startsWith("image/")) displayType = "inline";
+            if (forceInline) {
+                if (allowsForcedInline(fileInfo)) {
+                    displayType = "inline";
+                } else {
+                    break fileDownload;
+                }
+            }
             request.response.setHeader("Content-Disposition", displayType + "; filename=\"" + headerUrlEncode(fileInfo.fileName) + "\"");
             returnFile(request, fileId, fileInfo, dataFile, contentType);
             return;
         }
         request.response.setHeader("404 Not Found");
         returnJarResource(request, "/web/404.html");
+    }
+
+    private boolean allowsForcedInline(FileInfo fileInfo) {
+        if (fileInfo.contentType.startsWith("video/")) return true;
+        return false;
     }
 
     private void returnFile(HTTPRequest request, String fileId, FileInfo fileInfo, File dataFile, String contentType) throws Exception {
