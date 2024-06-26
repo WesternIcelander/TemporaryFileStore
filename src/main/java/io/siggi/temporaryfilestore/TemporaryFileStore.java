@@ -408,12 +408,51 @@ public class TemporaryFileStore {
             request.response.returnFile(dataFile, contentType);
             return;
         }
+        boolean partialContent = false;
+        long seekTo = -1L;
+        long stopAt = -1L;
+        long transferLimit = -1L;
         long fileSize = uploadInfo.getTotalSize();
         if (fileSize >= 0L) {
-            request.response.contentLength(fileSize);
+            String rangeHeader = request.getHeader("Range");
+            if (rangeHeader != null) {
+                try {
+                    if (rangeHeader.startsWith("bytes=")) {
+                        int dash = rangeHeader.indexOf("-");
+                        String left = rangeHeader.substring(6, dash);
+                        String right = rangeHeader.substring(dash + 1);
+                        seekTo = Long.parseLong(left);
+                        if (right.isEmpty()) {
+                            stopAt = fileSize;
+                        } else {
+                            stopAt = Long.parseLong(right) + 1L;
+                        }
+                    }
+                    if (seekTo >= 0L && stopAt > seekTo && stopAt <= fileSize && seekTo < uploadInfo.getAvailableData()) {
+                        partialContent = true;
+                        transferLimit = stopAt - seekTo;
+                    } else {
+                        seekTo = -1L;
+                        stopAt = -1L;
+                    }
+                } catch (Exception ignored) {
+                    seekTo = -1L;
+                    stopAt = -1L;
+                }
+            }
+            if (partialContent) {
+                request.response.contentLength(stopAt - seekTo);
+                request.response.setHeader("Content-Range", "bytes " + seekTo + "-" + (stopAt - 1) + "/" + fileSize);
+                request.response.setHeader("206 Partial Content");
+            } else {
+                request.response.contentLength(fileSize);
+            }
         }
         request.response.setContentType(contentType);
         try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
+            if (partialContent) {
+                raf.seek(seekTo);
+            }
             long amountTransferred = 0L;
             byte[] buffer = new byte[4096];
             while (amountTransferred < fileSize) {
@@ -422,8 +461,18 @@ public class TemporaryFileStore {
                     uploadInfo.waitForData();
                     continue;
                 }
-                request.response.write(buffer, 0, amountRead);
-                amountTransferred += amountRead;
+                int amountToWrite = amountRead;
+                if (transferLimit >= 0L) {
+                    if ((long) amountToWrite > transferLimit) {
+                        amountToWrite = (int) transferLimit;
+                    }
+                    transferLimit -= amountToWrite;
+                }
+                request.response.write(buffer, 0, amountToWrite);
+                amountTransferred += amountToWrite;
+                if (transferLimit == 0L) {
+                    break;
+                }
             }
         }
     }
