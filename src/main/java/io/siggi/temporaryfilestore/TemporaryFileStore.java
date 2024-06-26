@@ -413,17 +413,18 @@ public class TemporaryFileStore {
             request.response.contentLength(fileSize);
         }
         request.response.setContentType(contentType);
-        RandomAccessFile raf = new RandomAccessFile(dataFile, "r");
-        long amountTransferred = 0L;
-        byte[] buffer = new byte[4096];
-        while (amountTransferred < fileSize) {
-            int amountRead = raf.read(buffer, 0, buffer.length);
-            if (amountRead <= 0) {
-                uploadInfo.waitForData();
-                continue;
+        try (RandomAccessFile raf = new RandomAccessFile(dataFile, "r")) {
+            long amountTransferred = 0L;
+            byte[] buffer = new byte[4096];
+            while (amountTransferred < fileSize) {
+                int amountRead = raf.read(buffer, 0, buffer.length);
+                if (amountRead <= 0) {
+                    uploadInfo.waitForData();
+                    continue;
+                }
+                request.response.write(buffer, 0, amountRead);
+                amountTransferred += amountRead;
             }
-            request.response.write(buffer, 0, amountRead);
-            amountTransferred += amountRead;
         }
     }
 
