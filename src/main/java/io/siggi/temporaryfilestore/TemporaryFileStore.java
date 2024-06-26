@@ -405,9 +405,11 @@ public class TemporaryFileStore {
     private void returnFile(HTTPRequest request, String fileId, FileInfo fileInfo, File dataFile, String contentType) throws Exception {
         UploadInfo uploadInfo = getUploadInfo(fileId);
         if (uploadInfo == null || uploadInfo.isComplete()) {
+            request.response.setHeader("X-TemporaryFileStore-Upload-Status", "complete");
             request.response.returnFile(dataFile, contentType);
             return;
         }
+        request.response.setHeader("X-TemporaryFileStore-Upload-Status", "incomplete");
         boolean partialContent = false;
         long seekTo = -1L;
         long stopAt = -1L;
