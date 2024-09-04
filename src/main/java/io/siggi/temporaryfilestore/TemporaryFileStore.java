@@ -274,6 +274,33 @@ public class TemporaryFileStore {
             request.response.write(gson.toJson(result));
             return;
         }
+        if (request.url.equals("/extend")) {
+            JsonObject result = new JsonObject();
+            extend:
+            try {
+                String timezone = request.post.getOrDefault("timezone", request.get.get("timezone"));
+                String fileId = request.post.get("fileId");
+                FileInfo fileInfo = readFileInfo(fileId);
+                if (fileInfo == null) break extend;
+                if (!fileInfo.uploaderUuid.equals(deviceUuid)) break extend;
+                long maxExpiry = fileInfo.uploadTime + (86400000L * 14L);
+                if (fileInfo.expiry >= maxExpiry) {
+                    result.addProperty("message", "Maximum permitted file lifetime reached.");
+                    break extend;
+                }
+                fileInfo.expiry = Math.min(fileInfo.expiry + 86400000L, maxExpiry);
+                File jsonFile = new File(storageRoot, fileId + ".json");
+                writeStringToFile(jsonFile, gsonPretty.toJson(fileInfo));
+                result.addProperty("success", true);
+                result.addProperty("newExpiry", longToDateString(fileInfo.expiry, timezone));
+                result.addProperty("newEpochExpiry", fileInfo.expiry);
+            } catch (Exception e) {
+            }
+            if (!result.has("success")) result.addProperty("success", false);
+            request.response.setContentType("application/json");
+            request.response.write(gson.toJson(result));
+            return;
+        }
         if (request.url.equals("/upload")) {
             String uploadContentType = request.getHeader("Content-Type");
             if (uploadContentType == null) uploadContentType = "";

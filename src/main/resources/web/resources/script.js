@@ -68,6 +68,10 @@
                 listItem.removeFromList();
             });
         });
+        let extendButton = listItem.addButton("+24h", async (e) => {
+            e.preventDefault();
+            extendFileButtonClicked(fileId, listItem);
+        });
 
         let formData = new FormData();
         formData.append("json", "1");
@@ -112,6 +116,28 @@
         let result = JSON.parse(await fetchPromise);
         return result.success;
     }
+    const extendFile = async function (fileId) {
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "/extend");
+        let fetchPromise = xhrPromise(xhr);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("fileId=" + fileId + "&timezone=" + timezone);
+
+        let result = JSON.parse(await fetchPromise);
+        return result;
+    }
+    const extendFileButtonClicked = async function(fileId, listItem) {
+        let result = await extendFile(fileId);
+        if (!result.success) {
+            if (result.message) {
+                listItem.setStatus(result.message);
+            } else {
+                listItem.setStatus("Server refused to perform action.");
+            }
+            return;
+        }
+        listItem.setStatus("Expires: " + result.newExpiry);
+    };
     const fetchPreviousUploads = async function () {
         let xhr = new XMLHttpRequest();
         xhr.open("POST", "/uploads");
@@ -150,6 +176,10 @@
                     e.preventDefault();
                     listItem.removeFromList();
                 })
+            });
+            listItem.addButton("+24h", async (e) => {
+                e.preventDefault();
+                extendFileButtonClicked(fileInfo.fileId, listItem);
             });
         }
     }
