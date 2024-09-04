@@ -312,7 +312,7 @@ public class TemporaryFileStore {
                             uploadInfo = newUpload(deviceUuid, -1L);
                             fileId = uploadInfo.getFileId();
                         }
-                        fileInfo = new FileInfo(uploadInfo.getFileId(), part.getFilename(), part.getContentType(), now + (60L * 60L * 24L * 2L * 1000L), request.getIPAddress(), deviceUuid);
+                        fileInfo = new FileInfo(uploadInfo.getFileId(), part.getFilename(), part.getContentType(), now, now + (60L * 60L * 24L * 2L * 1000L), request.getIPAddress(), deviceUuid);
                         File dataFile = new File(storageRoot, fileId);
                         File jsonFile = new File(storageRoot, fileId + ".json");
                         writeStringToFile(jsonFile, gsonPretty.toJson(fileInfo));
