@@ -236,7 +236,7 @@ public class TemporaryFileStore {
             String timezone = request.post.getOrDefault("timezone", request.get.get("timezone"));
             JsonArray array = new JsonArray();
             List<FileInfo> allFiles = getAllFiles(file -> file.uploaderUuid.equals(deviceUuid));
-            allFiles.sort(Comparator.comparing(a -> a.expiry));
+            allFiles.sort(Comparator.comparing(a -> a.uploadTime));
             for (FileInfo fileInfo : allFiles) {
                 JsonObject object = new JsonObject();
                 array.add(object);
