@@ -42,9 +42,13 @@
         fileId = preuploadResult.fileId;
         listItem.setLink(preuploadResult.fileId, preuploadResult.link);
 
-        listItem.addButton("Copy Link", (e) => {
+        listItem.addButton("Copy", (e) => {
             e.preventDefault();
             navigator.clipboard.writeText(fileUrl);
+        });
+        listItem.addButton("QR", (e) => {
+            e.preventDefault();
+            showQrCode(file.name, fileUrl);
         });
         let downloadButton = listItem.addButton("Download", fileUrl);
         let deleteButton = listItem.addButton("Cancel Upload", async (e) => {
@@ -124,9 +128,13 @@
             let fileInfo = result[i];
             listItem.setLink(fileInfo.fileId, fileInfo.link);
             listItem.setStatus("Expires: " + fileInfo.expiry);
-            listItem.addButton("Copy Link", (e) => {
+            listItem.addButton("Copy", (e) => {
                 e.preventDefault();
                 navigator.clipboard.writeText(fileInfo.link);
+            });
+            listItem.addButton("QR", (e) => {
+                e.preventDefault();
+                showQrCode(result[i].file, fileInfo.link);
             });
             listItem.addButton("Download", fileInfo.link);
             listItem.addButton("Delete", async (e) => {
@@ -227,6 +235,44 @@
 
         return {setLink, setStatus, addButton, removeButton, removeAllButtons, removeFromList};
     };
+
+    const showQrCode = function(title, link) {
+        let qrCodeModal = document.createElement("DIV");
+        qrCodeModal.className = "modalbox qrmodal";
+
+        let header = document.createElement("H2");
+        header.appendChild(document.createTextNode(title));
+        qrCodeModal.appendChild(header);
+
+        let qrBox = document.createElement("DIV");
+        qrCodeModal.appendChild(qrBox);
+        let qrCode = new QRCode(qrBox, {
+            text: link,
+            width: 192,
+            height: 192,
+            colorDark: "#ffffff",
+            colorLight: "#404040",
+            correctLevel: QRCode.CorrectLevel.L
+        });
+
+        openModal(qrCodeModal).addEventListener("click", closeModal);
+    };
+    let currentModal = null;
+    const openModal = function(modal) {
+        closeModal();
+        let modalPopup = document.createElement("DIV");
+        modalPopup.appendChild(modal);
+        modalPopup.className = "modalpopup";
+        let topDiv = document.getElementById("topdiv");
+        topDiv.insertBefore(modalPopup, topDiv.firstChild);
+        return currentModal = modalPopup;
+    };
+    const closeModal = function() {
+        if (currentModal == null) return;
+        currentModal.parentNode.removeChild(currentModal);
+        currentModal = null;
+    };
+
     window.addEventListener("load", () => {
         timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         uploadInfoDiv = document.getElementById("uploadinfodiv");
@@ -268,4 +314,6 @@
 
         fetchPreviousUploads();
     });
+
+    window.showQrCode = showQrCode;
 })();

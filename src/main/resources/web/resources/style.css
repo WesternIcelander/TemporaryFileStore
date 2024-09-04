@@ -61,6 +61,29 @@ a.actionbutton {
 	background-color: #606060;
 	display: inline-block;
 }
+div.modalpopup {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+.modalbox {
+	display: block;
+	margin: 60px auto;
+	width: 90%;
+	max-width: 400px;
+}
+.qrmodal {
+	text-align: center;
+	background-color: #404040;
+	padding: 40px 0;
+}
+.qrmodal img {
+	display: block;
+	margin: 0 auto;
+}
 @media only screen and (max-width: 639px) {
 	div#topdiv {
 		padding: 16px;
